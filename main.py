@@ -29,6 +29,8 @@ pip3 install -r requirements.txt
 
 This will install the packages from the requirements.txt for this project.
 '''
+load_dotenv()
+
 EMAIL = os.getenv('EMAIL')
 PASSWORD = os.getenv('PASSWORD')
 RECIVER_EMAIL = os.getenv('RECIVER_EMAIL')

@@ -10,6 +10,9 @@ from sqlalchemy import Integer, String, Text
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from forms import CreatePostForm, RegisterForm, LoginForm, CommentForm
+from dotenv import load_dotenv
+import os
+import smtplib
 # Optional: add contact me email functionality (Day 60)
 # import smtplib
 
@@ -26,10 +29,12 @@ pip3 install -r requirements.txt
 
 This will install the packages from the requirements.txt for this project.
 '''
-
+EMAIL = os.getenv('EMAIL')
+PASSWORD = os.getenv('PASSWORD')
+RECIVER_EMAIL = os.getenv('RECIVER_EMAIL')
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
+app.config['SECRET_KEY'] = os.getenv('FLASK_KEY')
 ckeditor = CKEditor(app)
 Bootstrap5(app)
 
@@ -56,7 +61,7 @@ gravatar = Gravatar(app,
 # CREATE DATABASE
 class Base(DeclarativeBase):
     pass
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///posts.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DB_URI',"sqlite:///posts.db")
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
@@ -272,6 +277,33 @@ def about():
 
 @app.route("/contact", methods=["GET", "POST"])
 def contact():
+    if request.method == "POST":
+        name = request.form.get('name')
+        email = request.form.get('email')
+        contact = request.form.get('phone')
+        msg = request.form.get('message')
+
+        with  smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()    
+            server.login(EMAIL,PASSWORD)
+
+            server.sendmail(
+                from_addr=EMAIL,
+                to_addrs=RECIVER_EMAIL,
+                msg=f" The user {name} \n send msg which is {msg} \n To contact the user The user email is {email} and Phone number is {contact}"
+            )
+
+            server.sendmail(
+                from_addr=EMAIL,
+                to_addrs=email,
+                msg="Thank You For your Feedback Our team will be contact You in few second."
+            )
+
+
+        
+
+        
+
     return render_template("contact.html", current_user=current_user)
 
 # Optional: You can include the email sending code from Day 60:
